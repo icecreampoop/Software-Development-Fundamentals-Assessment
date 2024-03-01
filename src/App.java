@@ -59,6 +59,12 @@ public class App {
                 }
             }
 
+            if (userInput.equals("2")) {
+                System.out.println("Search for the next occurrence of 5 stars Pokemon in all stacks based on entered Pokemon >");
+                userInput = scan.nextLine();
+                printNext5StarsPokemon(userInput);
+            }
+
             if (userInput.equals("3")) {
                 System.out.println("Create a new Pokemon stack and save to a new file >");
                 String fileData = scan.nextLine();
@@ -67,7 +73,7 @@ public class App {
                 fileService.writeAsCSV(fileData, Paths.get(filePath));
             }
 
-            System.out.println("Press any key to continue...");
+            System.out.print("Press any key to continue...");
             userInput = scan.nextLine();
         }
 
@@ -85,6 +91,34 @@ public class App {
         for (String uniquePokemon : uniquePokemonSet) {
             System.out.println(String.format("%d ==> %s", count, uniquePokemon));
             count++;
+        }
+    }
+
+    private static void printNext5StarsPokemon(String pokemonToFind) {
+
+        for (int x = 1; x < pokemonStackStore.size() + 1 ; x++) {
+            System.out.println(String.format("Set %d", x));
+            int count = 1;
+
+            int index;
+            if ((index = pokemonStackStore.get(x).indexOf(pokemonToFind)) == -1) {
+                System.out.println(String.format("%s not found in this set.", pokemonToFind));
+            } else {
+                boolean does5StarExist = false;
+
+                for (int y = index + 1; y < pokemonStackStore.get(x).size(); y++) {
+                    if (pokemonStackStore.get(x).get(y).charAt(0) == '5') {
+                        System.out.println(String.format("%s>>>%d cards to go.", pokemonStackStore.get(x).get(y), count));
+                        does5StarExist = true;
+                        break;
+                    }
+                    count++;
+                }
+
+                if (!does5StarExist) {
+                    System.out.println("No 5 stars Pokemon found subsequently in the stack.");
+                }
+            }
         }
     }
 }
