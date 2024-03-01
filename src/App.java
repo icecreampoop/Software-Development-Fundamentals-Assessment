@@ -8,6 +8,8 @@ import java.util.Scanner;
 public class App {
     private static HashMap<Integer, List<String>> pokemonStackStore = new HashMap<>();
     private static HashSet<String> uniquePokemonSet = new HashSet<>();
+    private static HashMap<String, Integer> pokeCardCountMap;
+
     public static void main(String[] args) throws Exception {
         String welcome = """
                 Welcome to Pokemon Gaole Legend 4 Rush 2
@@ -22,15 +24,15 @@ public class App {
         String userInput = "";
         Scanner scan = new Scanner(System.in);
 
-        //storing csv data
+        // storing csv data
         FileService fileService = new FileService();
         int count = 1;
-         for (String lines : fileService.csvReader(args[0])) {
+        for (String lines : fileService.csvReader(args[0])) {
             pokemonStackStore.put(count, Arrays.asList(lines.split(",")));
             count++;
-         }
+        }
 
-         //main session
+        // main session
         while (!userQuit) {
             System.out.print(welcome);
             userInput = scan.nextLine().toLowerCase().trim();
@@ -57,12 +59,21 @@ public class App {
                 } catch (NumberFormatException nfe) {
                     System.out.println("Please enter a valid stack number");
                 }
+
+                System.out.print("Press any key to continue...");
+                userInput = scan.nextLine();
+                continue;
             }
 
             if (userInput.equals("2")) {
-                System.out.println("Search for the next occurrence of 5 stars Pokemon in all stacks based on entered Pokemon >");
+                System.out.println(
+                        "Search for the next occurrence of 5 stars Pokemon in all stacks based on entered Pokemon >");
                 userInput = scan.nextLine();
                 printNext5StarsPokemon(userInput);
+
+                System.out.print("Press any key to continue...");
+                userInput = scan.nextLine();
+                continue;
             }
 
             if (userInput.equals("3")) {
@@ -71,10 +82,20 @@ public class App {
                 System.out.println("Enter filename to save (e.g. path/filename.csv) >");
                 String filePath = scan.nextLine();
                 fileService.writeAsCSV(fileData, Paths.get(filePath));
+
+                System.out.print("Press any key to continue...");
+                userInput = scan.nextLine();
+                continue;
             }
 
-            System.out.print("Press any key to continue...");
-            userInput = scan.nextLine();
+            if (userInput.equals("4")) {
+                printPokemonCardCount();
+                
+                System.out.print("Press any key to continue...");
+                userInput = scan.nextLine();
+                continue;
+            }
+
         }
 
         scan.close();
@@ -96,7 +117,7 @@ public class App {
 
     private static void printNext5StarsPokemon(String pokemonToFind) {
 
-        for (int x = 1; x < pokemonStackStore.size() + 1 ; x++) {
+        for (int x = 1; x < pokemonStackStore.size() + 1; x++) {
             System.out.println(String.format("Set %d", x));
             int count = 1;
 
@@ -108,7 +129,8 @@ public class App {
 
                 for (int y = index + 1; y < pokemonStackStore.get(x).size(); y++) {
                     if (pokemonStackStore.get(x).get(y).charAt(0) == '5') {
-                        System.out.println(String.format("%s>>>%d cards to go.", pokemonStackStore.get(x).get(y), count));
+                        System.out
+                                .println(String.format("%s>>>%d cards to go.", pokemonStackStore.get(x).get(y), count));
                         does5StarExist = true;
                         break;
                     }
@@ -119,6 +141,35 @@ public class App {
                     System.out.println("No 5 stars Pokemon found subsequently in the stack.");
                 }
             }
+        }
+    }
+
+    private static void printPokemonCardCount() {
+        pokeCardCountMap = new HashMap<>();
+
+        for (int key : pokemonStackStore.keySet()) {
+            for (String pokemon : pokemonStackStore.get(key)) {
+                if (pokeCardCountMap.containsKey(pokemon)) {
+                    pokeCardCountMap.put(pokemon, pokeCardCountMap.get(pokemon) + 1);
+                } else {
+                    pokeCardCountMap.put(pokemon, 1);
+                }
+            }
+        }
+
+        for (int x = 1; x < 11; x++) {
+            int currentTopCount = 0;
+            String currentTopPokemon = "";
+            for (String pokemon : pokeCardCountMap.keySet()) {
+                if (pokeCardCountMap.get(pokemon) > currentTopCount) {
+                    currentTopCount = pokeCardCountMap.get(pokemon);
+                    currentTopPokemon = pokemon;
+                }
+            }
+
+            System.out
+                    .println(String.format("Pokemon %d : %s, Cards Count: %d", x, currentTopPokemon, currentTopCount));
+            pokeCardCountMap.remove(currentTopPokemon);
         }
     }
 }
